@@ -5,29 +5,66 @@
  */
 package rmilibraryserver;
 
+import java.awt.BorderLayout;
+import java.awt.Font;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.lang.reflect.InvocationTargetException;
+import java.rmi.RemoteException;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
+import rmilibraryserver.rmi.Book;
+import willy.database.MySqlConnection;
+import willy.gui.CustomConsole;
+
 /**
  *
  * @author Willy
  */
 public class Main extends willy.gui.Ventana {
 
-    public Main(String title, int w, int h, boolean resizable) {
+    private final MySqlConnection con;
+    private final RMI rmi;
+
+    private final JTextArea text = new JTextArea();
+
+    public Main(final String title, final int w, final int h, final boolean resizable) throws SQLException, ClassNotFoundException {
         super(title, w, h, resizable);
+        super.getContentPane().setLayout(new BorderLayout());
+        CustomConsole.replaceOutputConsole(text);
+
+        this.con = new MySqlConnection(MySqlConnection.LOCALHOST + "LibraryBD", "root", "n0m3l0");
+        this.rmi = new RMI(con);
+
+        super.addWindowFocusListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent we) {
+                try {
+                    con.disconnect();
+                } catch (SQLException ex) {
+                    System.err.println(ex.getMessage());
+                }
+            }
+        });
+
     }
 
     @Override
-    public void setComp() {
-
+    public void setComp() {        
+        final JScrollPane jsp = new JScrollPane(text);
+        this.text.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 11));
+        super.addComp(jsp, BorderLayout.CENTER);
     }
 
-    public static void main(String[] args) {
-        Main m = new Main("Servidor RMI de la biblioteca", 500, 500, false);
-        Thread t = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                m.mostrar();
-            }
-        });
-        t.start();
+    public static void main(String[] args) throws InterruptedException, InvocationTargetException, ClassNotFoundException, SQLException, RemoteException {
+        final Main m = new Main("Servidor RMI de la biblioteca", 300, 300, true);
+        final Thread t = new Thread(m::mostrar);
+        SwingUtilities.invokeAndWait(t);
+        m.rmi.startServices();
+        System.out.println("Server succesfully started");
     }
 }
