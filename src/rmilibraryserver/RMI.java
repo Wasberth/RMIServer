@@ -335,7 +335,10 @@ public class RMI {
                     + "        LOCATE(?, `Author`.`ath_nam`) != 0 OR\n"
                     + "        LOCATE(?, `Book`.`bok_psh`) != 0\n"
                     + "    )\n"
-                    + "GROUP BY `Library`.`lbk_id`;"
+                    + "GROUP BY `Library`.`lbk_id`;",
+                    new MySqlParam(JDBCType.VARCHAR, search),
+                    new MySqlParam(JDBCType.VARCHAR, search),
+                    new MySqlParam(JDBCType.VARCHAR, search)
             );
             rs.last();
             int size = rs.getRow();
