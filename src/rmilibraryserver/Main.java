@@ -10,6 +10,8 @@ import java.awt.Font;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.lang.reflect.InvocationTargetException;
+import java.net.UnknownHostException;
+import java.rmi.AlreadyBoundException;
 import java.rmi.RemoteException;
 import java.sql.SQLException;
 import java.util.logging.Level;
@@ -40,10 +42,11 @@ public class Main extends willy.gui.Ventana {
         this.con = new MySqlConnection(MySqlConnection.LOCALHOST + "LibraryBD", "root", "n0m3l0");
         this.rmi = new RMI(con);
 
-        super.addWindowFocusListener(new WindowAdapter() {
+        super.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent we) {
                 try {
+                    System.out.println("Desconecting...");
                     con.disconnect();
                 } catch (SQLException ex) {
                     System.err.println(ex.getMessage());
@@ -60,7 +63,7 @@ public class Main extends willy.gui.Ventana {
         super.addComp(jsp, BorderLayout.CENTER);
     }
 
-    public static void main(String[] args) throws InterruptedException, InvocationTargetException, ClassNotFoundException, SQLException, RemoteException {
+    public static void main(String[] args) throws InterruptedException, InvocationTargetException, ClassNotFoundException, SQLException, RemoteException, UnknownHostException, AlreadyBoundException {
         final Main m = new Main("Servidor RMI de la biblioteca", 300, 300, true);
         final Thread t = new Thread(m::mostrar);
         SwingUtilities.invokeAndWait(t);

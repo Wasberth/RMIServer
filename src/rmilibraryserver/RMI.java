@@ -90,6 +90,28 @@ public class RMI {
             }
         }
 
+        @Override
+        public Author[] getAuthors() throws RemoteException, SQLException {
+            ResultSet rs = con.executeQuery(""
+                    + "SELECT\n"
+                    + "	`Author`.`ath_id`,\n"
+                    + "	`Author`.`ath_nam`\n"
+                    + "FROM `Author`;"
+            );
+            rs.last();
+            int size = rs.getRow();
+            rs.beforeFirst();
+            System.out.println("size: " + size);
+
+            Author[] authors = new Author[size];
+            int i = 0;
+            while (rs.next()) {
+                authors[i] = new Author(rs.getInt("ath_id"), rs.getString("ath_nam"));
+                i++;
+            }
+            return authors;
+        }
+
     }
 
     private class AuthoryDatabase extends UnicastRemoteObject implements BookAuthoryService {
@@ -180,6 +202,7 @@ public class RMI {
 
         @Override
         public Book[] getBooks() throws RemoteException, SQLException {
+            System.out.println("rmilibraryserver.RMI.BookDatabase.getBooks()");
             ResultSet rs = con.executeQuery(""
                     + "SELECT\n"
                     + "	`Book`.`bok_id`  AS `BookID`,\n"
@@ -198,6 +221,36 @@ public class RMI {
                 i++;
             }
             return books;
+        }
+
+        @Override
+        public Author[] getAuthors(int id) throws RemoteException, SQLException {
+            System.out.println("\nrmilibraryserver.RMI.BookDatabase.getAuthors()");
+            ResultSet rs = con.executeQuery(""
+                    + "SELECT\n"
+                    + "	`Author`.`ath_id`,\n"
+                    + "	`Author`.`ath_nam`\n"
+                    + "FROM \n"
+                    + "	`Author`, `Book`, `BookAuthor`\n"
+                    + "WHERE \n"
+                    + "	`Author`.`ath_id` = `BookAuthor`.`ath_id` AND\n"
+                    + "	`Book`.`bok_id` = `BookAuthor`.`bok_id` AND\n"
+                    + "	`Book`.`bok_id` = ?;",
+                    new MySqlParam(JDBCType.INTEGER, id)
+            );
+            rs.last();
+            int size = rs.getRow();
+            rs.beforeFirst();
+            System.out.println("size: " + size);
+
+            Author[] authors = new Author[size];
+            int i = 0;
+            while (rs.next()) {
+                authors[i] = new Author(rs.getInt("ath_id"), rs.getString("ath_nam"));
+                System.out.println(authors[i].getName());
+                i++;
+            }
+            return authors;
         }
 
     }
@@ -274,6 +327,7 @@ public class RMI {
 
         @Override
         public InstancedBook[] getLibraryBooks() throws RemoteException, SQLException {
+            System.out.println("rmilibraryserver.RMI.LibraryBookDatabase.getLibraryBooks()");
             ResultSet rs = con.executeQuery(""
                     + "SELECT \n"
                     + "    `Library`.`lbk_id`  AS `LibraryID`,\n"
@@ -296,7 +350,7 @@ public class RMI {
             rs.last();
             int size = rs.getRow();
             rs.beforeFirst();
-
+            System.out.println("The size of the query is: " + size);
             InstancedBook[] iBooks = new InstancedBook[size];
             int i = 0;
             while (rs.next()) {
