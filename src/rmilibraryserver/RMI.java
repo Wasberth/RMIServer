@@ -50,20 +50,24 @@ public class RMI {
         }
 
         @Override
-        public void addAuthor(Author author) throws RemoteException {
+        public Author addAuthor(String authorName) throws RemoteException {
+            System.out.println("rmilibraryserver.RMI.AuthorDatabase.addAuthor()");
             try {
-                con.executeUpdate(""
+                int i = con.executeUpdate(""
                         + "INSERT INTO `Author` (`ath_nam`) VALUES\n"
                         + "	(?);",
-                        new MySqlParam(JDBCType.VARCHAR, author.getName())
+                        new MySqlParam(JDBCType.VARCHAR, authorName)
                 );
+                return new Author(i, authorName);
             } catch (SQLException ex) {
                 System.err.println(ex.getMessage());
+                return null;
             }
         }
 
         @Override
         public void modifyAuthor(Author author) throws RemoteException {
+            System.out.println("rmilibraryserver.RMI.AuthorDatabase.modifyAuthor()");
             try {
                 con.executeUpdate(""
                         + "UPDATE `Author` SET\n"
@@ -79,6 +83,7 @@ public class RMI {
 
         @Override
         public void deleteAuthor(int id) throws RemoteException {
+            System.out.println("rmilibraryserver.RMI.AuthorDatabase.deleteAuthor()");
             try {
                 con.executeUpdate(""
                         + "DELETE FROM `Author` WHERE\n"
@@ -92,11 +97,13 @@ public class RMI {
 
         @Override
         public Author[] getAuthors() throws RemoteException, SQLException {
+            System.out.println("rmilibraryserver.RMI.AuthorDatabase.getAuthors()");
             ResultSet rs = con.executeQuery(""
                     + "SELECT\n"
                     + "	`Author`.`ath_id`,\n"
                     + "	`Author`.`ath_nam`\n"
-                    + "FROM `Author`;"
+                    + "FROM `Author`"
+                    + "ORDER BY `ath_id`;"
             );
             rs.last();
             int size = rs.getRow();
@@ -122,6 +129,7 @@ public class RMI {
 
         @Override
         public void setAuthory(int bookId, int... authorsIds) throws RemoteException {
+            System.out.println("rmilibraryserver.RMI.AuthoryDatabase.setAuthory()");
             try {
                 con.executeUpdate(""
                         + "DELETE FROM `BookAuthor` WHERE\n"
@@ -157,21 +165,25 @@ public class RMI {
         }
 
         @Override
-        public void addBook(Book book) throws RemoteException {
+        public Book addBook(Book book) throws RemoteException {
+            System.out.println("rmilibraryserver.RMI.BookDatabase.addBook()");
             try {
-                con.executeUpdate(""
+                int i = con.executeUpdate(""
                         + "INSERT INTO `Book` (`bok_nam`, `bok_psh`) VALUES\n"
                         + "	(?, ?);",
                         new MySqlParam(JDBCType.VARCHAR, book.getName()),
                         new MySqlParam(JDBCType.VARCHAR, book.getPublisher())
                 );
+                return new Book(i, book.getName(), book.getPublisher());
             } catch (SQLException ex) {
                 System.err.println(ex.getMessage());
+                return null;
             }
         }
 
         @Override
         public void modifyBook(Book book) throws RemoteException {
+            System.out.println("rmilibraryserver.RMI.BookDatabase.modifyBook()");
             try {
                 con.executeUpdate(""
                         + "UPDATE `Book` SET\n"
@@ -189,6 +201,7 @@ public class RMI {
 
         @Override
         public void deleteBook(int id) throws RemoteException {
+            System.out.println("rmilibraryserver.RMI.BookDatabase.deleteBook()");
             try {
                 con.executeUpdate(""
                         + "DELETE FROM `Book` WHERE\n"
@@ -263,6 +276,7 @@ public class RMI {
 
         @Override
         public void addLibraryBook(LibraryBook book) throws RemoteException {
+            System.out.println("rmilibraryserver.RMI.LibraryBookDatabase.addLibraryBook()");
             try {
                 con.executeUpdate(""
                         + "INSERT INTO `Library` (`lbk_bok`, `lbk_edt`, `lbk_tot`, `lbk_brd`) VALUES\n"
@@ -279,6 +293,7 @@ public class RMI {
 
         @Override
         public void modifyLibraryBook(LibraryBook book) throws RemoteException {
+            System.out.println("rmilibraryserver.RMI.LibraryBookDatabase.modifyLibraryBook()");
             try {
                 con.executeUpdate(""
                         + "UPDATE `Library` SET\n"
@@ -300,6 +315,7 @@ public class RMI {
 
         @Override
         public void deleteLibraryBook(int id) throws RemoteException {
+            System.out.println("rmilibraryserver.RMI.LibraryBookDatabase.deleteLibraryBook()");
             try {
                 con.executeUpdate(""
                         + "DELETE FROM `Library` WHERE\n"
@@ -313,6 +329,7 @@ public class RMI {
 
         @Override
         public void borrowBook(int quantity) throws RemoteException {
+            System.out.println("rmilibraryserver.RMI.LibraryBookDatabase.borrowBook()");
             try {
                 con.executeUpdate(""
                         + "UPDATE `Library` SET\n"
@@ -367,6 +384,7 @@ public class RMI {
 
         @Override
         public InstancedBook[] searchBooks(String search) throws RemoteException, SQLException {
+            System.out.println("rmilibraryserver.RMI.LibraryBookDatabase.searchBooks()");
             ResultSet rs = con.executeQuery(""
                     + "SELECT \n"
                     + "    `Library`.`lbk_id`  AS `LibraryID`,\n"

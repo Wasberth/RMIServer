@@ -30,23 +30,34 @@ public class MySqlConnection {
     public void disconnect() throws SQLException {
         con.close();
     }
-    
+
     public ResultSet executeQuery(final String query) throws SQLException {
+        System.out.println("willy.database.MySqlConnection.executeQuery()");
         PreparedStatement p = con.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
         return p.executeQuery();
     }
 
-    public boolean executeUpdate(final String query, final MySqlParam... params) throws SQLException {
-        PreparedStatement p = con.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+    public int executeUpdate(final String query, final MySqlParam... params) throws SQLException {
+        System.out.println("willy.database.MySqlConnection.executeUpdate()");
+        final PreparedStatement p = con.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
         int i = 0;
         for (MySqlParam param : params) {
             i++;
             p.setObject(i, param.getValue(), param.getType());
         }
-        return p.execute();
+        p.executeUpdate();
+        final ResultSet rs = p.getGeneratedKeys();
+        final int result;
+        if (rs.next()) {
+            result = rs.getInt(1);
+        } else {
+            result = -1;
+        }
+        return result;
     }
 
     public ResultSet executeQuery(final String query, final MySqlParam... params) throws SQLException {
+        System.out.println("willy.database.MySqlConnection.executeQuery()");
         PreparedStatement p = con.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
         int i = 0;
         for (MySqlParam param : params) {
